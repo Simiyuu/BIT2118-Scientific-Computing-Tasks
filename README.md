@@ -85,3 +85,37 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * Iterative loop processing took ~0.38s.
   * Vectorized processing finished in ~0.008s (giving a ~47x performance gain).
 * **Takeaway:** For real-time threat detection or streaming pipelines handling millions of packets per second, vectorized operations are essential to avoid dropping packets.
+
+## Task 04: Floating-Point Arithmetic and Numerical Errors
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** Decimals `0.1`, `0.2`, `0.3`, approximate square root value `1.414` against true $\sqrt{2}$, and pertubations $x \in \{10^{-4}, 10^{-8}, 10^{-12}\}$.
+* **Math operations:**
+  * Absolute Error: $E_{\text{abs}} = \vert{}x_{\text{true}} - x_{\text{approx}}\vert{}$.
+  * Relative Error: $E_{\text{rel}} = \frac{\vert{}x_{\text{true}} - x_{\text{approx}}\vert{}}{\vert{}x_{\text{true}}\vert{}}$.
+  * IEEE 754 Floating-point comparison: Using `np.isclose()` with machine epsilon tolerances instead of strict identity (`==`).
+  * Catastrophic cancellation avoidance: Evaluating $\frac{\sqrt{1+x}-1}{x}$ algebraically restructured by conjugate multiplication to $\frac{1}{\sqrt{1+x}+1}$.
+
+### C. Parameter Variation Experiment
+* **What I tested:** Added an even smaller perturbation $x = 10^{-16}$ to the stability loop.
+* **What happened:**
+  * The direct formulation output crashed completely to `0.000000000000`.
+  * The algebraically stable formulation retained the mathematically correct limit of `0.500000000000`.
+* **Why it changed:** In 64-bit binary floating-point representation, $1.0 + 10^{-16}$ falls below the machine precision limit (around $2.22 \times 10^{-16}$), so it rounds straight back to $1.0$. Evaluating $(1.0 - 1.0) / 10^{-16}$ causes severe catastrophic cancellation, turning a non-zero quantity into an absolute zero numerator.
+
+### D. Output Interpretation
+* `0.1 + 0.2 == 0.3` returned `False` because binary cannot represent decimal tenths precisely (it stores `0.30000000000000004`), proving why financial or scientific systems require `np.isclose()`.
+* The absolute error between $\sqrt{2}$ and $1.414$ was ~$0.00021356$, with a relative error of ~$0.0151\%$.
+* The stable formulation consistently preserved precision across all small values of $x$.
+
+### E. Real-World Adaptation: Financial Ledger Drift Analysis
+* **Script Location:** `adaptations/Task_04_adapted.py`
+* **Real-world Problem:** Tracking micro-transaction fees in high-frequency trading where binary rounding drift can accumulate substantial financial discrepancy across millions of records.
+* **Assumptions:** 1,000,000 transactions each incurring a 0.05% fee on a $10.10 base charge.
+* **New Inputs & Computations:**
+  * Theoretical baseline: $\$5,050.000000$.
+  * Comparing naive incremental loop addition vs NumPy's parallel precision accumulation.
+* **Results & Findings:**
+  * Naive incremental loop drifted slightly from the expected sum due to accumulated float round-off errors.
+  * Direct equality `naive_total == exact_total_fees` evaluated to `False`, while `np.isclose()` confirmed ledger consistency within tolerance.
+* **Takeaway:** Scientific and fintech code must never use exact equality checks on floating-point totals, and mathematical formulas must be factored algebraically to prevent precision loss.
