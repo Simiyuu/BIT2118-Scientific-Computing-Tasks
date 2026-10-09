@@ -53,3 +53,35 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * **Off-peak / Peak:** Min was 25.00 Mbps, peak hit 312.00 Mbps.
   * **Total Transferred Data:** `np.sum(hourly_gigabytes)` yielded **1,885.44 GB** transferred over the day.
 * **Takeaway:** This gives the network admin clear visibility into peak congestion windows and helps verify whether our daily payload is approaching data cap limits.
+
+## Task 03: Mathematical Functions and Vectorization
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** A simulated dataset of 1,000,000 floating-point numbers (`latency_ms`) sampled uniformly between 5 ms and 250 ms using `np.random.default_rng(42)`.
+* **Math operations:**
+  * Scaling: Converting millisecond readings to seconds ($s = \frac{ms}{1000}$).
+  * Non-linear mapping: Squaring each scaled reading ($s^2$).
+  * Vectorization vs Iteration: Standard Python iterates through 1M items one by one with `.append()`, suffering dynamic type-checking overhead. NumPy pushes the entire batch straight to compiled C code (SIMD architecture), calculating all 1M operations in parallel.
+
+### C. Parameter Variation Experiment
+* **What I changed:** Scaled the sample count up from 1,000,000 to 3,000,000 measurements.
+* **What happened:**
+  * The manual loop execution time ballooned from ~0.45s to well over 1.4s.
+  * The vectorized NumPy execution barely moved, staying around ~0.02s.
+* **Why it changed:** As $N$ grows, the interpreter overhead in Python loops compounds linearly with every iteration, whereas NumPy executes contiguous memory operations with optimized memory caching.
+
+### D. Output Interpretation
+* The script outputs the first 5 squared latency values to confirm correct calculation.
+* Comparing `Loop time` against `Vectorized time` showed an immediate ~20x-30x speed-up, proving why raw loops should never be used on heavy scientific or telemetry datasets.
+
+### E. Real-World Adaptation: Network Packet Size Normalization
+* **Script Location:** `adaptations/Task_03_adapted.py`
+* **Real-world Problem:** Processing 1,000,000 network packet sizes captured by an intrusion detection system (IDS) to normalize them between $[0.0, 1.0]$ for an ML anomaly detection model.
+* **Assumptions:** Standard Ethernet MTU frames range from 64 Bytes minimum to 1518 Bytes maximum.
+* **New Inputs & Computations:** 
+  * Random integer packet sizes generated between 64 and 1518.
+  * Formula: $x_{\text{norm}} = \frac{x - 64}{1518 - 64}$.
+* **Results & Findings:**
+  * Iterative loop processing took ~0.38s.
+  * Vectorized processing finished in ~0.008s (giving a ~47x performance gain).
+* **Takeaway:** For real-time threat detection or streaming pipelines handling millions of packets per second, vectorized operations are essential to avoid dropping packets.
