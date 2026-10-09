@@ -119,3 +119,35 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * Naive incremental loop drifted slightly from the expected sum due to accumulated float round-off errors.
   * Direct equality `naive_total == exact_total_fees` evaluated to `False`, while `np.isclose()` confirmed ledger consistency within tolerance.
 * **Takeaway:** Scientific and fintech code must never use exact equality checks on floating-point totals, and mathematical formulas must be factored algebraically to prevent precision loss.
+
+## Task 05: Matrix Algebra and Matrix Operations
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** A $4 \times 2$ coordinate matrix (`points`) defining a unit square, a $2 \times 2$ rotation matrix computed for $\theta = 45^\circ$, and a $2 \times 2$ diagonal scaling matrix ($s_x = 2.0, s_y = 1.5$).
+* **Math operations:**
+  * Matrix Multiplication: Composite transformation formed by $T = R \cdot S$ using the `@` operator.
+  * Linear Coordinate Mapping: Row-vector transformation using transpose multiplication: $P_{\text{new}} = P \cdot T^T$.
+  * Determinant: Evaluated with `np.linalg.det(T)` to quantify the geometric area scaling factor.
+
+### C. Parameter Variation Experiment
+* **What I tested:** Changed the scaling matrix from non-uniform scaling $[2.0, 1.5]$ to uniform scaling $[3.0, 3.0]$.
+* **What happened:**
+  * The determinant of the transformation jumped from `3.00` to `9.00`.
+  * The transformed coordinates stretched outwards proportionally along both axes.
+* **Why it changed:** The determinant of a transformation matrix represents the geometric area scaling ratio ($\det(R \cdot S) = \det(R) \times \det(S) = 1 \times (s_x \cdot s_y)$). Tripling both axes scales the enclosed 2D area by a factor of $3 \times 3 = 9$.
+
+### D. Output Interpretation
+* The script prints the transformed vertices of the square, showing that the shape has been simultaneously enlarged and rotated $45^\circ$ counter-clockwise.
+* The determinant value of `3.0` confirms that the area of the transformed polygon is exactly 3 times larger than the original unit square (which had area 1).
+
+### E. Real-World Adaptation: Drone Surveillance Perimeter Transformation
+* **Script Location:** `adaptations/Task_05_adapted.py`
+* **Real-world Problem:** Adjusting a 4-point autonomous drone patrol boundary due to wind-pattern changes (requiring a $30^\circ$ coordinate rotation) and perimeter expansion ($1.2\times$ on X, $1.5\times$ on Y).
+* **Assumptions:** Flat 2D Euclidean coordinate space in meters relative to a ground control station origin $[0,0]$.
+* **New Inputs & Computations:**
+  * 4 waypoints enclosing a $40\text{ m} \times 30\text{ m}$ rectangular zone.
+  * Composite matrix $T = R_{30^\circ} \times S_{[1.2, 1.5]}$.
+* **Results & Findings:**
+  * The waypoints smoothly mapped to the rotated and enlarged search region without needing loop-based point calculations.
+  * The determinant evaluated to $1.80$, proving the newly covered surveillance area grew by exactly $80\%$.
+* **Takeaway:** Linear transformations via matrix multiplication allow entire batches of spatial geometry to be transformed instantaneously in robotics and computer vision pipelines.
