@@ -282,3 +282,34 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * API Gateway had the highest centrality (~34.2%), followed by User DB (~28.5%).
   * Notification Service held the lowest blast radius (~7.1%).
 * **Takeaway:** Calculating eigenvector centrality mathematically identifies the single most critical dependency node in distributed architectures, indicating where zero-trust authentication policies should be enforced first.
+
+## Task 10: Root Finding: Bisection and Fixed-Point Methods
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** Continuous function $f(T) = T - 25 - 10e^{-T/20}$, sign-bracketing interval $[20, 40]$, fixed-point function $g(T) = 25 + 10e^{-T/20}$, and tolerance $\text{tol} = 10^{-10}$.
+* **Math operations:**
+  * **Bisection Method:** Repeated interval bisection using the Intermediate Value Theorem; requires $f(a) \cdot f(b) < 0$. Computes midpoint $c = \frac{a+b}{2}$ and halves the interval until $\vert{}b-a\vert{} < \text{xtol}$.
+  * **Fixed-Point Iteration:** Rewriting $f(T) = 0$ as $T = g(T)$ and iterating $T_{k+1} = g(T_k)$. Converges if $\vert{}g'(T)\vert{} < 1$ near the fixed point.
+
+### C. Parameter Variation Experiment
+* **What I tested:** Shifted the ambient temperature constant from $25$ to $35$ and adjusted the search bracket to $[30, 50]$.
+* **What happened:**
+  * The root moved up to $36.68^\circ\text{C}$.
+  * Testing an invalid bracket without a sign change (e.g. $[38, 50]$ where $f(T) > 0$ throughout) threw a runtime error immediately.
+* **Why it changed:** Bisection strictly relies on opposite boundary signs to guarantee that the continuous function crosses zero within the interval.
+
+### D. Output & Graph Interpretation
+* **Terminal output:** Both Bisection and Fixed-Point iteration found the exact equilibrium value of `27.731778°C`. Fixed-point converged in 9 iterations.
+* **Graph interpretation:** The function curve $f(T)$ crosses the horizontal zero-line at $T \approx 27.73^\circ\text{C}$, confirming that thermal heat intake matches thermal loss at this specific temperature.
+
+### E. Real-World Adaptation: Cloud SaaS Subscription Break-Even Model
+* **Script Location:** `adaptations/Task_10_adapted.py`
+* **Real-world Problem:** Determining the exact paid subscriber count required for an enterprise software platform to break even against fixed infrastructure and non-linear customer support costs.
+* **Assumptions:** Revenue scales linearly at \$15/user; costs include a \$12k base plus logarithmic support overhead.
+* **New Inputs & Computations:**
+  * Non-linear objective: $f(N) = 7N - 12000 - 4000\ln(N) = 0$.
+  * Bisection bracket $[1000, 8000]$.
+* **Results & Findings:**
+  * Break-even subscriber volume was found at exactly **6,306 paid users**.
+  * Both bisection and fixed-point schemes converged to the identical subscriber threshold.
+* **Takeaway:** Root-finding algorithms provide exact numerical thresholds for complex systems when non-linear equations cannot be solved using simple algebra.
