@@ -151,3 +151,35 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * The waypoints smoothly mapped to the rotated and enlarged search region without needing loop-based point calculations.
   * The determinant evaluated to $1.80$, proving the newly covered surveillance area grew by exactly $80\%$.
 * **Takeaway:** Linear transformations via matrix multiplication allow entire batches of spatial geometry to be transformed instantaneously in robotics and computer vision pipelines.
+
+## Task 06: Solution of Systems of Linear Equations
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** Coefficient matrix $A \in \mathbb{R}^{2 \times 2}$ encoding per-server CPU and memory footprints, and vector $b \in \mathbb{R}^2$ containing total observed system consumption.
+* **Math operations:**
+  * Direct solution of linear system $Ax = b$ via `np.linalg.solve()`, applying LU factorization with partial pivoting.
+  * Solution validation: Matrix-vector product $A x$ and backward error (residual vector) $r = b - Ax$.
+  * Euclidean residual norm: $\Vert{}r\Vert{}_2 = \sqrt{\sum r_i^2}$ via `np.linalg.norm()` to verify numerical precision.
+
+### C. Parameter Variation Experiment
+* **What I tested:** Adjusted total consumed CPU in vector $b$ from `20.0` to `26.0` units while keeping memory constant at `72.0` GB.
+* **What happened:**
+  * The required server count shifted from integer values $(3, 4)$ to fractional values $(5.29, 2.43)$.
+  * The residual norm remained virtually zero ($\approx 0.0$).
+* **Why it changed:** Changing the constant vector $b$ moves the intersection point of the linear hyperplanes in coordinate space; because the matrix remains non-singular ($\det(A) \neq 0$), a unique continuous solution is always guaranteed.
+
+### D. Output Interpretation
+* The script determined that exactly 3 Type A servers and 4 Type B servers account for the observed resource totals.
+* The residual norm of $0.0$ confirms that machine precision solved the simultaneous equations without round-off drift.
+
+### E. Real-World Adaptation: Cloud VM Provisioning for SOC Telemetry
+* **Script Location:** `adaptations/Task_06_adapted.py`
+* **Real-world Problem:** Determining the exact count of deployed Network Intrusion Detection (IDS) nodes versus SIEM log aggregator instances given aggregated hypervisor vCPU and RAM metrics.
+* **Assumptions:** Instances run under full static reservation without resource over-commit.
+* **New Inputs & Computations:**
+  * System matrix representing 8 vCPU/16 GB RAM for IDS nodes and 4 vCPU/32 GB RAM for SIEM aggregators.
+  * Target usage: 88 vCPUs and 224 GB RAM.
+* **Results & Findings:**
+  * Solved for exactly 10 IDS nodes and 2 SIEM aggregator VMs.
+  * The residual norm evaluated to $0.00\text{e}+00$, validating exact hardware saturation.
+* **Takeaway:** Solving $Ax = b$ enables instant fleet auditing and capacity verification from coarse infrastructure telemetry.
