@@ -215,3 +215,36 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * Morning Peak voltages: $[7.00, 5.50, 6.62]\text{ V}$.
   * All residual norms remained below $10^{-15}$, proving exact current conservation across nodes.
 * **Takeaway:** For physical simulations where geometry/topology remains stationary while external forces or loads fluctuate, pre-factoring $A$ via LU decomposition saves massive computational overhead.
+
+## Task 08: Iterative Methods for Linear Systems
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** A $5 \times 5$ tridiagonal matrix $A$ representing 1D discrete Laplace conduction, boundary vector $b = [100, 0, 0, 0, 20]^T$, and convergence tolerance $\text{tol} = 10^{-8}$.
+* **Math operations:**
+  * **Jacobi Iteration:** $x^{(k+1)} = D^{-1} (b - (L + U) x^{(k)})$, where all components are updated simultaneously using values from step $k$.
+  * **Gauss-Seidel Iteration:** Uses newly calculated components $x_i^{(k+1)}$ immediately for remaining entries in the same pass:
+    $$x_i^{(k+1)} = \frac{1}{a_{ii}} \left( b_i - \sum_{j < i} a_{ij} x_j^{(k+1)} - \sum_{j > i} a_{ij} x_j^{(k)} \right)$$
+  * Stopping criterion: Infinity norm of difference vector $\Vert{}x^{(k+1)} - x^{(k)}\Vert{}_\infty < \text{tol}$.
+
+### C. Parameter Variation Experiment
+* **What I tested:** Tightened tolerance from $10^{-8}$ down to $10^{-12}$.
+* **What happened:**
+  * Jacobi iteration count climbed from 71 to 108.
+  * Gauss-Seidel iteration count climbed from 37 to 57.
+* **Why it changed:** Both methods exhibit linear convergence rates governed by the spectral radius of their iteration matrices. Because Gauss-Seidel incorporates updated values on the fly, its spectral radius is smaller ($\rho_{GS} \approx \rho_J^2$), roughly doubling the rate of convergence.
+
+### D. Output & Graph Interpretation
+* **Terminal output:** Both methods converged to the analytical temperature distribution: $[86.67, 73.33, 60.00, 46.67, 33.33]^\circ\text{C}$.
+* **Semilog plot:** The error curves decline linearly on a logarithmic scale. Gauss-Seidel displays a steeper downward slope, requiring nearly half the iterations of Jacobi to achieve the same precision.
+
+### E. Real-World Adaptation: Water Network Junction Pressure Analysis
+* **Script Location:** `adaptations/Task_08_adapted.py`
+* **Real-world Problem:** Determining steady-state hydraulic pressure heads along 5 consecutive pipeline junctions connecting an 80 PSI reservoir to a 15 PSI distribution terminus.
+* **Assumptions:** Pipe friction and cross-sectional geometry are constant, yielding a diagonally dominant resistance matrix.
+* **New Inputs & Computations:**
+  * Matrix $A_{\text{pipe}}$ with main diagonal $2.5$ and off-diagonals $-1.0$.
+  * Boundary heads of 80 PSI and 15 PSI.
+* **Results & Findings:**
+  * Estimated node pressures: $[34.54, 6.36, 1.35, 0.99, 6.40]\text{ PSI}$.
+  * Gauss-Seidel achieved convergence within 18 iterations, matching the exact direct solution to 6 decimal places.
+* **Takeaway:** For very large sparse matrices (thousands of equations), iterative algorithms avoid huge memory requirements ($O(n)$ storage) and compute solutions efficiently when direct matrix inversion is too costly.
