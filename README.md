@@ -183,3 +183,35 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * Solved for exactly 10 IDS nodes and 2 SIEM aggregator VMs.
   * The residual norm evaluated to $0.00\text{e}+00$, validating exact hardware saturation.
 * **Takeaway:** Solving $Ax = b$ enables instant fleet auditing and capacity verification from coarse infrastructure telemetry.
+
+## Task 07: Gaussian Elimination and LU Decomposition
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** A strictly diagonally dominant $3 \times 3$ tridiagonal matrix $A$ and three distinct right-hand side observation vectors $b_1, b_2, b_3$.
+* **Math operations:**
+  * LU Factorization: Decomposing $P A = L U$, where $P$ is a permutation matrix, $L$ is lower triangular, and $U$ is upper triangular (`scipy.linalg.lu_factor`).
+  * Back/Forward Substitution: Solving $L y = P b$ followed by $U x = y$ using `scipy.linalg.lu_solve`.
+  * Algorithmic efficiency: Computing the $O(n^3)$ elimination once and reusing triangular factors for successive inputs in $O(n^2)$ time.
+
+### C. Parameter Variation Experiment
+* **What I tested:** Added a fourth measurement vector $b_4 = [25.0, 5.0, 15.0]^T$ to the evaluation pipeline.
+* **What happened:**
+  * The solver computed the fourth solution vector $[6.01, 0.96, 5.32]^T$ with a residual norm of $2.22 \times 10^{-16}$.
+  * No matrix re-factorization occurred.
+* **Why it changed:** LU decomposition decouples the matrix reduction from the vector solution. New vectors only trigger forward- and backward-substitution passes.
+
+### D. Output Interpretation
+* Solutions for each measurement set matched `np.linalg.solve()` to machine precision.
+* The tiny residual norms ($\approx 10^{-15}$) confirm that partial pivoting preserved numerical stability throughout Gaussian elimination.
+
+### E. Real-World Adaptation: Power Substation Bus Voltage Analysis
+* **Script Location:** `adaptations/Task_07_adapted.py`
+* **Real-world Problem:** Determining substation bus voltages in a static distribution grid under fluctuating morning, afternoon, and night load conditions.
+* **Assumptions:** Line admittances between transmission buses remain invariant over time.
+* **New Inputs & Computations:**
+  * Constant conductance matrix $A_{\text{grid}} \in \mathbb{R}^{3 \times 3}$.
+  * Time-varying current injection vectors for 3 operational load regimes.
+* **Results & Findings:**
+  * Morning Peak voltages: $[7.00, 5.50, 6.62]\text{ V}$.
+  * All residual norms remained below $10^{-15}$, proving exact current conservation across nodes.
+* **Takeaway:** For physical simulations where geometry/topology remains stationary while external forces or loads fluctuate, pre-factoring $A$ via LU decomposition saves massive computational overhead.
