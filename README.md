@@ -412,3 +412,36 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * At $t=15\text{s}$, linear interpolation predicted $57.50\text{ km/h}$ while cubic spline predicted $58.91\text{ km/h}$.
   * The cubic spline curve models vehicle momentum and gradual brake curves more accurately.
 * **Takeaway:** Cubic splines are preferred for physical and kinematic telemetry reconstruction because they avoid unrealistic, sharp derivative discontinuities.
+
+## Task 14: Curve Fitting and Approximation
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** Load levels $x = [50, \dots, 350]$ concurrent users and observed server latencies $y = [82, \dots, 305]\text{ ms}$.
+* **Math operations:**
+  * **Non-linear Least Squares (`curve_fit`):** Determines model parameters $a, b, c$ by minimizing the residual sum of squares:
+    $$\min_{a, b, c} \sum_{i=1}^N (y_i - f(x_i; a, b, c))^2$$
+    via the Levenberg-Marquardt optimization algorithm.
+  * **Root Mean Square Error (RMSE):** Assesses fit quality via $\text{RMSE} = \sqrt{\frac{1}{N}\sum (y_i - \hat{y}_i)^2}$.
+
+### C. Parameter Variation Experiment
+* **What I tested:** Replaced the quadratic model with a simple linear model ($y = mx + c$).
+* **What happened:**
+  * The linear fit failed to capture the upward curvature of the data.
+  * The RMSE degraded from $0.72\text{ ms}$ up to $> 15.4\text{ ms}$.
+* **Why it changed:** Server queues exhibit non-linear queue delay effects under load; fitting a linear function introduces structural model bias.
+
+### D. Output & Graph Interpretation
+* The fitted quadratic curve $y = 0.001905x^2 + 0.0814x + 73.14$ fit the data points closely with $\text{RMSE} \approx 0.72\text{ ms}$.
+* Extrapolating to 400 concurrent users yields an estimated response time of $387.6\text{ ms}$, providing an evidence-based basis for autoscaling limits.
+
+### E. Real-World Adaptation: IoT Battery Discharge Curve Fitting
+* **Script Location:** `adaptations/Task_14_adapted.py`
+* **Real-world Problem:** Fitting an exponential decay function to battery voltage discharge logs to predict when a remote sensor hits its $3.0\text{ V}$ cutoff threshold.
+* **Assumptions:** Electrochemical discharge follows an exponential decay with an asymptotic baseline ($V(t) = a e^{-bt} + c$).
+* **New Inputs & Computations:**
+  * Measured voltage logs over 16 continuous hours.
+  * Non-linear least-squares fit determining decay rate $b$.
+* **Results & Findings:**
+  * Model converged with $\text{RMSE} = 0.021\text{ V}$.
+  * The model predicts the device will reach the $3.0\text{ V}$ brownout threshold at approximately $20.5$ hours of operation.
+* **Takeaway:** Least-squares curve fitting allows parameterized mathematical models to capture real-world physical dynamics and make actionable predictions from sparse empirical observations.
