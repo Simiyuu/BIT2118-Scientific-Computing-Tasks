@@ -313,3 +313,37 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * Break-even subscriber volume was found at exactly **6,306 paid users**.
   * Both bisection and fixed-point schemes converged to the identical subscriber threshold.
 * **Takeaway:** Root-finding algorithms provide exact numerical thresholds for complex systems when non-linear equations cannot be solved using simple algebra.
+
+## Task 11: Root Finding: Newton-Raphson and Secant Methods
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** Discrete cash flows array $C = [-10000, 3000, 3500, 4000, 2500]$, initial rate guesses $x_0 = 0.10$ and $[0.05, 0.20]$, tolerance $\text{tol} = 10^{-12}$.
+* **Math operations:**
+  * **Newton-Raphson Method:** Tangent-line iteration using analytical derivative:
+    $$x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}$$
+    Where $f(r) = \sum_{t=0}^T \frac{C_t}{(1+r)^t}$ and $f'(r) = \sum_{t=1}^T \frac{-t \cdot C_t}{(1+r)^{t+1}}$.
+  * **Secant Method:** Finite-difference approximation replacing the derivative with two consecutive points:
+    $$x_{n+1} = x_n - f(x_n) \frac{x_n - x_{n-1}}{f(x_n) - f(x_{n-1})}$$
+
+### C. Parameter Variation Experiment
+* **What I tested:** Adjusted Newton-Raphson's initial guess from $x_0 = 0.10$ to $x_0 = 1.80$.
+* **What happened:**
+  * The algorithm still converged to the true root ($12.083163\%$), but required more iterations.
+  * Setting a negative starting guess near $-1.0$ caused severe numerical overflow due to the denominator $(1+r) \to 0$.
+* **Why it changed:** Newton-Raphson features quadratic convergence locally ($\epsilon_{n+1} \propto \epsilon_n^2$), but convergence is not globally guaranteed if the derivative flattens or approaches a vertical asymptote.
+
+### D. Output Interpretation
+* **IRR (~12.08%):** Represents the discount rate where project Net Present Value equals exactly zero.
+* **Residual Check:** The NPV value evaluated at the calculated root yielded $0.000000$, validating convergence within the specified tolerance.
+
+### E. Real-World Adaptation: Semiconductor Diode Operating Point
+* **Script Location:** `adaptations/Task_11_adapted.py`
+* **Real-world Problem:** Finding the forward voltage drop $V_d$ and loop current in a circuit containing a resistor and a non-linear silicon diode.
+* **Assumptions:** Room temperature operation ($V_t = 26\text{ mV}$), ideality factor $n=1$, saturation current $I_s = 10^{-12}\text{ A}$.
+* **New Inputs & Computations:**
+  * Circuit transcendental equation: $f(V_d) = \frac{V_s - V_d}{R} - I_s(e^{V_d/(nV_t)} - 1) = 0$.
+  * Solved using both Newton-Raphson and Secant methods with derivative calculation.
+* **Results & Findings:**
+  * Operating forward voltage stabilized at $V_d \approx 0.687\text{ V}$.
+  * Forward branch current calculated to $4.313\text{ mA}$.
+* **Takeaway:** Newton-Raphson provides fast quadratic convergence for hardware and physical circuit simulations where closed-form algebraic solutions are impossible.
