@@ -380,3 +380,35 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * Solved primary emitter position at $(3.000\text{ km}, 4.000\text{ km})$ and alternate reflection at $(4.615\text{ km}, -1.885\text{ km})$.
   * Residual norms evaluating to $< 10^{-14}$ confirmed precise positioning.
 * **Takeaway:** Solving non-linear multivariate systems enables real-time sensor fusion, trilateration, and physical coordinate reconstruction from range sensors.
+
+## Task 13: Interpolation
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** Discrete 1D hourly time array $t \in [8, 14]$ and corresponding temperature observations $T \in [18.0, 25.5]^\circ\text{C}$.
+* **Math operations:**
+  * **Piecewise Linear Interpolation:** Straight-line estimation between consecutive knots:
+    $$y(x) = y_i + \frac{y_{i+1} - y_i}{x_{i+1} - x_i}(x - x_i)$$
+  * **Cubic Spline Interpolation (`CubicSpline`):** Piecewise 3rd-order polynomials $S_i(x) = a_i + b_i(x-x_i) + c_i(x-x_i)^2 + d_i(x-x_i)^3$ enforcing continuity in function values, 1st derivatives, and 2nd derivatives ($C^2$ continuity) across internal knots.
+
+### C. Parameter Variation Experiment
+* **What I tested:** Introduced an abrupt outlier into the dataset by increasing the 11:00 value from $24.0^\circ\text{C}$ to $28.0^\circ\text{C}$.
+* **What happened:**
+  * Linear interpolation formed sharp, angular corners at the spike.
+  * Cubic spline generated a smooth, continuous curve that overshot neighboring intervals to maintain continuous second derivatives.
+* **Why it changed:** Splines ensure second derivative continuity ($S''_i(x_{i+1}) = S''_{i+1}(x_{i+1})$); localized spikes induce oscillation ("spline ringing") across adjacent subintervals.
+
+### D. Output & Graph Interpretation
+* At $t = 10.5$ (10:30), linear interpolation estimated $23.25^\circ\text{C}$ while cubic spline produced $23.33^\circ\text{C}$.
+* The plot shows the spline generates smooth, physically realistic temperature curves without the sharp inflection points of piecewise linear segments.
+
+### E. Real-World Adaptation: Vehicle Speed Telemetry Reconstruction
+* **Script Location:** `adaptations/Task_13_adapted.py`
+* **Real-world Problem:** Reconstructing vehicle acceleration profiles from intermittently dropped IoT GPS sensor signals.
+* **Assumptions:** Acceleration changes smoothly without instantaneous jumps ($C^1$ velocity continuity).
+* **New Inputs & Computations:**
+  * Irregularly sampled timestamps from 0 to 60 seconds.
+  * Reconstructed speed profile evaluated at 1-second intervals.
+* **Results & Findings:**
+  * At $t=15\text{s}$, linear interpolation predicted $57.50\text{ km/h}$ while cubic spline predicted $58.91\text{ km/h}$.
+  * The cubic spline curve models vehicle momentum and gradual brake curves more accurately.
+* **Takeaway:** Cubic splines are preferred for physical and kinematic telemetry reconstruction because they avoid unrealistic, sharp derivative discontinuities.
