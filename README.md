@@ -347,3 +347,36 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * Operating forward voltage stabilized at $V_d \approx 0.687\text{ V}$.
   * Forward branch current calculated to $4.313\text{ mA}$.
 * **Takeaway:** Newton-Raphson provides fast quadratic convergence for hardware and physical circuit simulations where closed-form algebraic solutions are impossible.
+
+## Task 12: Polynomial and Nonlinear Equation Solving
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** A coupled 2D vector non-linear system $F(x, y) = [x^2 + y^2 - 4, \; y - (x^2 - 1)]^T$, solved across two distinct initial vector guesses $[1, 1]^T$ and $[-1, 1]^T$.
+* **Math operations:**
+  * Multi-dimensional non-linear root finding via `scipy.optimize.root` (using the hybrid Powell minimization / MINPACK algorithm).
+  * Iterative Jacobian updates approximating multidimensional Taylor expansions:
+    $$J(z_k) \Delta z_k = -F(z_k), \quad z_{k+1} = z_k + \Delta z_k$$
+  * Convergence validation via residual vector norm inspection.
+
+### C. Parameter Variation Experiment
+* **What I tested:** Reduced the circle radius constant from $4$ down to $1$ ($x^2 + y^2 = 1$).
+* **What happened:**
+  * The geometry changed from two deep intersection arcs to intersecting right at the bottom vertex $(0, -1)$ plus lateral intersections at $y = -0.5$.
+  * Initial guesses close to the origin easily locked onto the $(0, -1)$ root.
+* **Why it changed:** Changing constants in non-linear polynomial systems directly alters the manifold topology, shifting or eliminating bifurcation and intersection coordinates.
+
+### D. Output Interpretation
+* The solver returned $x = \pm 1.2496$ and $y = 0.5616$, accurately reflecting the bilateral reflection symmetry along the vertical y-axis.
+* Residual checks yielded $[0.0, 0.0]$, indicating the numerical solution satisfies both equations simultaneously.
+
+### E. Real-World Adaptation: Radar Trilateration of Rogue Signal Emitter
+* **Script Location:** `adaptations/Task_12_adapted.py`
+* **Real-world Problem:** Finding the precise 2D coordinate $(x, y)$ of an unauthorized rogue Wi-Fi/RF transmitter using time-of-arrival distance radii from two monitoring stations.
+* **Assumptions:** Sensor 1 positioned at $(0, 0)$ with range 5 km; Sensor 2 at $(4, 1)$ with range $\approx 3.61$ km.
+* **New Inputs & Computations:**
+  * Non-linear circle equations: $x^2 + y^2 - 25 = 0$ and $(x-4)^2 + (y-1)^2 - 13 = 0$.
+  * Solved from different quadrants to locate primary and alternate intersection points.
+* **Results & Findings:**
+  * Solved primary emitter position at $(3.000\text{ km}, 4.000\text{ km})$ and alternate reflection at $(4.615\text{ km}, -1.885\text{ km})$.
+  * Residual norms evaluating to $< 10^{-14}$ confirmed precise positioning.
+* **Takeaway:** Solving non-linear multivariate systems enables real-time sensor fusion, trilateration, and physical coordinate reconstruction from range sensors.
