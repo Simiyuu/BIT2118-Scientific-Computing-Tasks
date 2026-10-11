@@ -445,3 +445,34 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * Model converged with $\text{RMSE} = 0.021\text{ V}$.
   * The model predicts the device will reach the $3.0\text{ V}$ brownout threshold at approximately $20.5$ hours of operation.
 * **Takeaway:** Least-squares curve fitting allows parameterized mathematical models to capture real-world physical dynamics and make actionable predictions from sparse empirical observations.
+
+## Task 15: Numerical Differentiation
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** Time timestamps $t = [0, 1, 2, 3, 4, 5, 6]$ seconds and cumulative spatial positions $x = [0.0, 4.8, 10.2, 16.1, 22.7, 30.0, 38.0]$ meters.
+* **Math operations:**
+  * **Forward Difference (start point):** $f'(x_0) \approx \frac{f(x_1) - f(x_0)}{h}$ with truncation error $O(h)$.
+  * **Central Difference (interior points):** $f'(x_i) \approx \frac{f(x_{i+1}) - f(x_{i-1})}{2h}$ with truncation error $O(h^2)$.
+  * **Backward Difference (end point):** $f'(x_n) \approx \frac{f(x_n) - f(x_{n-1})}{h}$ with truncation error $O(h)$.
+
+### C. Parameter Variation Experiment
+* **What I tested:** Replaced the central difference operator at interior index $i=3$ with a one-sided forward difference.
+* **What happened:**
+  * Estimated speed at $t=3\text{s}$ changed from $6.25\text{ m/s}$ (central) to $6.60\text{ m/s}$ (forward).
+* **Why it changed:** A forward difference evaluates the slope ahead of the point, incurring a first-order truncation error proportional to $h$, whereas central difference cancels out odd Taylor series error terms to achieve second-order $O(h^2)$ accuracy.
+
+### D. Output & Graph Interpretation
+* The calculated speeds increase monotonically from $4.80\text{ m/s}$ up to $8.00\text{ m/s}$.
+* The plot indicates constant positive acceleration, as evidenced by the linear ramp in speed over time.
+
+### E. Real-World Adaptation: Estimating DDoS Traffic Influx Rate
+* **Script Location:** `adaptations/Task_15_adapted.py`
+* **Real-world Problem:** Differentiating cumulative incoming web request counters to detect the onset of a Layer-7 HTTP flood or DDoS attack.
+* **Assumptions:** Influx counter updates at uniform intervals; second-order central difference provides accurate rate-of-change estimates for alert triggering.
+* **New Inputs & Computations:**
+  * Cumulative request counts over a 10-second window.
+  * Central difference derivative identifying instantaneous request velocity ($d(\text{Req})/dt$).
+* **Results & Findings:**
+  * Request rates spiked from an initial baseline of $70\text{ req/s}$ up to $700\text{ req/s}$ by $t=10\text{s}$.
+  * The derivative crossed the alert threshold ($500\text{ req/s}$) at $t=8\text{s}$, triggering early mitigation.
+* **Takeaway:** Numerical differentiation transforms static cumulative metrics into dynamic rates of change, which is essential for rate-limiting and automated anomaly detection.
