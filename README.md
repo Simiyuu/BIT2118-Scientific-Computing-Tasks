@@ -476,3 +476,39 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * Request rates spiked from an initial baseline of $70\text{ req/s}$ up to $700\text{ req/s}$ by $t=10\text{s}$.
   * The derivative crossed the alert threshold ($500\text{ req/s}$) at $t=8\text{s}$, triggering early mitigation.
 * **Takeaway:** Numerical differentiation transforms static cumulative metrics into dynamic rates of change, which is essential for rate-limiting and automated anomaly detection.
+
+## Task 16: Numerical Integration
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** Time coordinate array $t = [0, 2, 4, 6, 8, 10, 12]$ hours and power demand measurements $P = [0.8, 1.0, 1.4, 1.8, 1.6, 1.2, 0.9]\text{ kW}$.
+* **Math operations:**
+  * **Trapezoidal Rule (`np.trapezoid`):** Approximates area under the curve using linear piecewise trapezoids:
+    $$I_{\text{trap}} = \sum_{i=0}^{n-1} \frac{f(x_i) + f(x_{i+1})}{2} \Delta x_i$$
+    with local truncation error $O(h^2)$.
+  * **Simpson's Rule (`scipy.integrate.simpson`):** Fits second-degree parabolas across adjacent pairs of intervals:
+    $$I_{\text{simp}} = \frac{h}{3} \left[ f(x_0) + 4\sum_{j \text{ odd}} f(x_j) + 2\sum_{j \text{ even}} f(x_j) + f(x_n) \right]$$
+    with truncation error $O(h^4)$, yielding higher accuracy for smooth curves.
+
+### C. Parameter Variation Experiment
+* **What I tested:** Subsampled the array by taking every second point ($h$ increased from 2 hours to 4 hours).
+* **What happened:**
+  * The trapezoidal estimate changed from $15.800\text{ kWh}$ to $15.600\text{ kWh}$.
+  * The gap between Simpson's and trapezoidal results widened noticeably.
+* **Why it changed:** Truncation error scales with step size powers ($h^2$ vs $h^4$). Coarser spacing fails to capture peak curvature, causing underestimation.
+
+### D. Output Interpretation
+* Trapezoidal integration yielded **15.800 kWh** and Simpson's rule produced **15.867 kWh**.
+* The tiny difference of **0.067 kWh** indicates that 2-hour sampling was fine enough to approximate the smooth diurnal power profile reliably.
+
+### E. Real-World Adaptation: Cumulative Network Data Transfer Volume
+* **Script Location:** `adaptations/Task_16_adapted.py`
+* **Real-world Problem:** Determining cumulative ingress data volume in Gigabytes from continuous throughput logs (Mbps) over a 12-hour window.
+* **Assumptions:** Throughput varies continuously; 1 Gigabyte equals 8,000 Megabits.
+* **New Inputs & Computations:**
+  * Hourly sampled bandwidth measurements ranging from 45 Mbps to 380 Mbps.
+  * Integration across time in seconds ($t \times 3600$) with conversion to GB.
+* **Results & Findings:**
+  * Trapezoidal estimate: **1,066.50 GB**.
+  * Simpson's rule estimate: **1,068.60 GB**.
+  * Discrepancy is ~2.1 GB (~0.2%), validating network billable bandwidth calculations.
+* **Takeaway:** Numerical integration effectively transforms discrete sensor rate measurements (power, speed, bandwidth) into total accumulated quantities (energy, distance, data).
