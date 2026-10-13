@@ -546,3 +546,36 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * Voltage at 10 seconds: Euler yielded **0.0768 V** vs exact analytical **0.0809 V** (error of **0.0041 V**).
   * Confirmed that after $5\tau = 10\text{s}$, the capacitor is more than $99\%$ discharged.
 * **Takeaway:** Euler's method provides a straightforward numerical approach for dynamic systems, but step size must be balanced to maintain numerical stability and control truncation error.
+
+## Task 18: Numerical Solution of ODEs Using SciPy
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** Supply voltage $V_s = 5.0\text{ V}$, resistance $R = 1000\,\Omega$, capacitance $C = 0.001\text{ F}$, initial charge $V_0 = 0.0\text{ V}$, time horizon $[0, 5]\text{ s}$.
+* **Math operations:**
+  * **First-Order Differential System:** $\frac{dV}{dt} = \frac{V_s - V}{RC}$.
+  * **Adaptive Runge-Kutta Integration (`solve_ivp`):** Employs explicit embedded Runge-Kutta pair RK45 (Dormand-Prince) to automatically adapt step sizes based on local error estimates:
+    $$y_{n+1} = y_n + h \sum_{i=1}^s b_i k_i$$
+  * **Precision Tuning:** Adaptive control bounded by relative tolerance `rtol=1e-9` and absolute tolerance `atol=1e-11`.
+
+### C. Parameter Variation Experiment
+* **What I tested:** Relaxed solver tolerance thresholds from `rtol=1e-9` down to `rtol=1e-2`.
+* **What happened:**
+  * Maximum error against the analytical solution grew from $\approx 1.2 \times 10^{-9}\text{ V}$ to $8.7 \times 10^{-3}\text{ V}$.
+  * The solver required significantly fewer internal integration stages.
+* **Why it changed:** Adaptive ODE solvers expand step sizes $h$ when tolerances are relaxed; larger steps increase local truncation error while reducing computational overhead.
+
+### D. Output & Graph Interpretation
+* At $t = 5\text{ s}$ (5 time constants $\tau = RC = 1\text{ s}$), capacitor voltage reached $4.9663\text{ V}$ ($> 99.3\%$ charged).
+* The plot illustrates smooth asymptotic approach toward the $5\text{ V}$ supply limit, matching analytical curves without step-size distortion.
+
+### E. Real-World Adaptation: Corporate Network Malware Epidemic Model
+* **Script Location:** `adaptations/Task_18_adapted.py`
+* **Real-world Problem:** Modeling the spread of worm-like malware across 1,000 corporate workstations under automated patching countermeasures (SIS non-linear epidemic model).
+* **Assumptions:** Infection rate $\beta = 0.45\text{ hr}^{-1}$, remediation rate $\gamma = 0.10\text{ hr}^{-1}$, initial compromised endpoints $I_0 = 5$.
+* **New Inputs & Computations:**
+  * Governing non-linear ODE: $\frac{dI}{dt} = \beta I \frac{N-I}{N} - \gamma I$.
+  * Integrated across 30 hours using `solve_ivp`.
+* **Results & Findings:**
+  * Infection scaled rapidly after hour 4, stabilizing at an endemic steady-state equilibrium of $\approx 778$ hosts.
+  * Demonstrates that without increasing remediation rate $\gamma > \beta$, automated patching cannot eradicate the virus.
+* **Takeaway:** Higher-order adaptive solvers like `solve_ivp` provide stable, precise simulations for non-linear dynamic systems where Euler's method suffers numerical instability.
