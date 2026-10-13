@@ -611,3 +611,35 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * Solved for $x_1 = 15.60$ on-demand and $x_2 = 12.00$ spot instances.
   * Total hourly cost minimized at $\$4.08/\text{hr}$ while delivering exactly 1,200 req/s.
 * **Takeaway:** Numerical constrained optimization allows engineering teams to maximize resource utility and enforce compliance boundaries mathematically.
+
+## Task 20: Random Numbers and Monte Carlo Methods
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** Server capacity $C = 1000.0$, normal distribution parameters $\mu = 850.0$, $\sigma = 120.0$, trial count $N = 100,000$.
+* **Math operations:**
+  * **Pseudo-Random Number Generation:** NumPy PCG-64 BitGenerator sampling from normal distribution $X \sim \mathcal{N}(\mu, \sigma^2)$.
+  * **Monte Carlo Indicator Estimation:** Evaluates probability of exceedance:
+    $$P(X > C) \approx \frac{1}{N} \sum_{i=1}^N \mathbb{I}(X_i > C)$$
+  * **Convergence Tracking:** Running cumulative probability $\hat{p}_k = \frac{1}{k}\sum_{i=1}^k \mathbb{I}_i$ demonstrating the Strong Law of Large Numbers ($\hat{p}_N \xrightarrow{\text{a.s.}} p$).
+
+### C. Parameter Variation Experiment
+* **What I tested:** Increased demand standard deviation from $\sigma = 120$ to $\sigma = 200$.
+* **What happened:**
+  * The estimated overload probability rose from $10.56\%$ to $22.68\%$.
+* **Why it changed:** In Gaussian distributions, increasing dispersion flattens the density curve and widens tails. Even with constant mean demand ($850$), higher variance places substantially more probability mass into the tail region where $X > 1000$.
+
+### D. Output & Graph Interpretation
+* Overload probability stabilized at **10.56%** (~10,560 occurrences out of 100,000 trials).
+* The semi-log plot highlights high stochastic variance at small sample sizes ($N < 500$), followed by asymptotic flattening toward the theoretical value as $N \to 10^5$.
+
+### E. Real-World Adaptation: Monte Carlo Cyber Risk Financial Exposure
+* **Script Location:** `adaptations/Task_20_adapted.py`
+* **Real-world Problem:** Quantifying expected annual corporate financial loss from data breach incidents using compound Poisson-Lognormal stochastic modeling.
+* **Assumptions:** Annual incident frequency follows a Poisson process ($\lambda = 3$); single-incident loss severity follows a heavy-tailed Lognormal distribution.
+* **New Inputs & Computations:**
+  * 50,000 simulated operational years.
+  * Extracted expected loss, 95th-percentile Value-at-Risk (VaR), and tail risk probability.
+* **Results & Findings:**
+  * Average expected annual loss was $\approx \$540,000$.
+  * 95% Value-at-Risk was calculated at $\$1.82\text{M}$, with a $4.1\%$ likelihood of annual loss exceeding $\$2\text{M}$.
+* **Takeaway:** Monte Carlo simulation allows organizations to model complex, non-linear risk distributions and tail risks where analytical formulas cannot be easily integrated.
