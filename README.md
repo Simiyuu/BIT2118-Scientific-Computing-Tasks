@@ -579,3 +579,35 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * Infection scaled rapidly after hour 4, stabilizing at an endemic steady-state equilibrium of $\approx 778$ hosts.
   * Demonstrates that without increasing remediation rate $\gamma > \beta$, automated patching cannot eradicate the virus.
 * **Takeaway:** Higher-order adaptive solvers like `solve_ivp` provide stable, precise simulations for non-linear dynamic systems where Euler's method suffers numerical instability.
+
+## Task 19: Numerical Optimization
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** Cost coefficients $[12, 18]$, capacity yields $[100, 170]$, inequality constraint threshold $C_{\min} = 1000$, non-negative bounds $x, y \ge 0$.
+* **Math operations:**
+  * **Constrained Optimization Formulation:**
+    $$\min_{z} f(z) = 12x + 18y \quad \text{subject to } g(z) = 100x + 170y - 1000 \ge 0, \quad x, y \ge 0$$
+  * **Sequential Least Squares Programming (SLSQP):** Solves non-linear and linear constrained problems via iterative quadratic approximations of the Lagrangian function.
+  * **Discrete Integer Optimization:** Exhaustive grid search rounding continuous optimal boundary coordinates to physically realizable server counts.
+
+### C. Parameter Variation Experiment
+* **What I tested:** Increased required capacity from $1,000$ to $2,500$ units.
+* **What happened:**
+  * Minimum planning cost scaled up from $\$105.88$ to $\$264.71$.
+  * The optimizer allocated all capacity exclusively to Type B servers ($y = 14.706, x = 0$).
+* **Why it changed:** Type B offers superior cost-efficiency ($\$0.1059/\text{unit}$ vs $\$0.1200/\text{unit}$). Under unconstrained linear optimization, the solver drives allocation to the variable with the lowest marginal cost gradient.
+
+### D. Output Interpretation
+* The continuous solver recommended $x = 0.0$ and $y = 5.882$ for a minimum cost of $\$105.88$.
+* The discrete integer search selected 6 Type B servers for a real-world cost of $\$108.00$ delivering 1,020 capacity units, satisfying requirements without fractional allocation.
+
+### E. Real-World Adaptation: Hybrid Cloud Instance Cost Minimization
+* **Script Location:** `adaptations/Task_19_adapted.py`
+* **Real-world Problem:** Minimizing hourly cloud compute expenses across On-Demand instances (\$0.20/hr, 50 req/s) and Spot instances (\$0.08/hr, 35 req/s) subject to availability caps and a 1,200 req/s traffic demand.
+* **Assumptions:** Maximum allowable spot instances capped at 12 to mitigate sudden preemption risk.
+* **New Inputs & Computations:**
+  * Objective: $\min (0.20x_1 + 0.08x_2)$ subject to $50x_1 + 35x_2 \ge 1200$ and $0 \le x_2 \le 12$.
+* **Results & Findings:**
+  * Solved for $x_1 = 15.60$ on-demand and $x_2 = 12.00$ spot instances.
+  * Total hourly cost minimized at $\$4.08/\text{hr}$ while delivering exactly 1,200 req/s.
+* **Takeaway:** Numerical constrained optimization allows engineering teams to maximize resource utility and enforce compliance boundaries mathematically.
