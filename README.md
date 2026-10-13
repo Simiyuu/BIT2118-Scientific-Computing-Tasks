@@ -512,3 +512,37 @@ Before tackling the numerical computation modules, I completed the self-paced fo
   * Simpson's rule estimate: **1,068.60 GB**.
   * Discrepancy is ~2.1 GB (~0.2%), validating network billable bandwidth calculations.
 * **Takeaway:** Numerical integration effectively transforms discrete sensor rate measurements (power, speed, bandwidth) into total accumulated quantities (energy, distance, data).
+
+## Task 17: Ordinary Differential Equations - Euler Method
+
+### B. Inputs and Mathematical Operations
+* **Inputs:** Initial temperature $T_0 = 90^\circ\text{C}$, ambient temperature $T_{\text{ambient}} = 25^\circ\text{C}$, decay constant $k = 0.12\text{ min}^{-1}$, duration 30 minutes, step size $h = 1.0\text{ min}$.
+* **Math operations:**
+  * **First-order ODE Formulation:** Newton's Law of Cooling $\frac{dT}{dt} = -k(T - T_{\text{ambient}})$.
+  * **Explicit Euler Method:** Discretized forward-stepping update:
+    $$T_{n+1} = T_n + h \cdot f(t_n, T_n) = T_n + h(-k(T_n - T_{\text{ambient}}))$$
+    with local truncation error $O(h^2)$ and global error $O(h)$.
+  * **Analytical Benchmark:** Exact solution $T(t) = T_{\text{ambient}} + (T_0 - T_{\text{ambient}})e^{-kt}$.
+
+### C. Parameter Variation Experiment
+* **What I tested:** Reduced step size $h$ from $1.0\text{ min}$ to $0.1\text{ min}$, and also evaluated a coarse step of $h = 2.5\text{ min}$.
+* **What happened:**
+  * At $h = 0.1$, the final absolute error dropped from $0.5367^\circ\text{C}$ to $0.0572^\circ\text{C}$.
+  * At $h = 2.5$, the final absolute error climbed past $1.2^\circ\text{C}$.
+* **Why it changed:** Euler's method assumes the derivative remains constant over each step $h$. Smaller steps capture the exponential curvature more accurately, directly reducing cumulative global truncation error in proportion to $h$.
+
+### D. Output & Graph Interpretation
+* After 30 minutes, Euler's method predicted **26.24°C** compared to the exact analytical value of **26.78°C** (error: **0.54°C**).
+* The plot shows Euler's discrete steps track below the convex exact cooling curve because the forward tangent line underestimates the rate reduction as temperature falls toward ambient.
+
+### E. Real-World Adaptation: RC Circuit Decoupling Capacitor Discharge
+* **Script Location:** `adaptations/Task_17_adapted.py`
+* **Real-world Problem:** Simulating voltage decay across a decoupling capacitor ($R = 2\text{ k}\Omega$, $C = 1000\mu\text{F}$, $\tau = 2.0\text{s}$) during power loss in an IoT node.
+* **Assumptions:** Pure resistive load; linear time-invariant circuit with initial charge $V_0 = 12\text{V}$.
+* **New Inputs & Computations:**
+  * Governing ODE: $\frac{dV}{dt} = -\frac{V}{\tau}$.
+  * Euler update over 10 seconds with step size $h = 0.1\text{s}$.
+* **Results & Findings:**
+  * Voltage at 10 seconds: Euler yielded **0.0768 V** vs exact analytical **0.0809 V** (error of **0.0041 V**).
+  * Confirmed that after $5\tau = 10\text{s}$, the capacitor is more than $99\%$ discharged.
+* **Takeaway:** Euler's method provides a straightforward numerical approach for dynamic systems, but step size must be balanced to maintain numerical stability and control truncation error.
