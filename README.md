@@ -1,20 +1,13 @@
-# BIT2118-Scientific-Computing-Tasks
 
-* **Student Name:** [Simiyu Chandler Matere]
-* **Registration Number:** [BSCCS/2024/58571]
-* **Course:** BIT 2118 - Scientific Computing
-* **Coursework Component:** Group Collaboration & Individual Practical Portfolio
-
----
 
 ## Prerequisite / Task 01: Data Science Essentials with Python
 
 Before tackling the numerical computation modules, I completed the self-paced foundation course **Data Science Essentials with Python**. This course provided the core refresher on Python data structures, vectorized operations with NumPy, and clean script writing.
 
 * **Course Status:** Completed
-* **Course Title:** Data Science Essentials with Python
-* **Certificate / Proof of Completion:** 
-  * Included in this repo under `./certificates/Data_Science_Essentials_Certificate.pdf` *(or replace with your credential link / screenshot)*.
+* **Course Title:** Data Science Essentials with Python (Cisco Networking Academy)
+* **Certificate / Proof of Completion:** [View Certificate (PDF)](./certificates/Data_Science_Essentials_Certificate.pdf)
+
 
 ---
 
